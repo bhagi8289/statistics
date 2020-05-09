@@ -1,0 +1,326 @@
+---
+title: "T Distribution and Student's T Test"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+Statistician William Sealy Gosset, known as "Student"
+
+t-distribution arises when estimating population mean of a normally distributed population in sitations where
+
+1) sample size is small, and
+2) population standard deviation is unknown
+
+
+t-distribution plays important role in:
+1) Student's t-test for assessing the statistical significance of the difference between two sample means
+
+2) Construction of confidence intervals for the difference between two population means
+
+3) In linear regression analysis
+
+4) Bayesian analysis of data from normal distribution
+
+If we take a sample of n observations from normal distribution, then t-distribution with degrees of freedom, nu = n-1, can be defined as the distribution of the location of sample mean relative to true population mean, mu, divided by sample standard deviation, after multiplying by the standardizing term sqrt(n). In this way, t-distribution can be used to construct a confidence interval of the true mean.
+
+t-distribution is symmetric around mean but with heavier tails i.e. it is more prone to producing values that fall far from its mean.
+
+```{r}
+```
+
+
+```{r}
+# https://www.statology.org/working-with-the-student-t-distribution-in-r-dt-qt-pt-rt/
+# generate 10000 size t-distributed sample
+n <- 10000
+set.seed(91929, sample.kind = "Rounding")
+X <- rt(n,3) # df = 3
+X
+```
+```{r}
+hist(X,breaks = 100,main = "histogram of t-distributed data points")
+```
+
+```{r}
+# quantiles of Student's t-distribution
+x_qt <- seq(0,1,0.1)
+x_qt
+
+t_qt <- qt(x_qt,df=3)
+t_qt
+```
+
+```{r}
+plot(t_qt)
+```
+
+```{r}
+X <- seq(-10,10,0.1)
+X
+str(X)
+#probability density function of t-distribution
+# integration of dt  over all space is 1
+X_t <- dt(X,df=3)
+X_t
+```
+
+
+
+
+```{r}
+plot(X,X_t)
+```
+
+```{r}
+
+X_bar = mean(X)
+X_sd = sd(X)
+X_t_hat1 = (X[1] - X_bar)/(X_sd / sqrt(length(X)))
+X_t_hat1
+X_t[1]
+```
+
+
+Probability cumulative density function
+pt
+
+```{r}
+# Find area on the left of a t-statistic value 
+pt(0,df=3)
+
+# Area on the left for t-value -5
+pt(-5,df=3)
+
+# Area on right side
+pt(-5,df=3,lower.tail = FALSE)
+
+# Area on right side = 1 - area on the left side
+
+```
+
+Function qt returns reverse cdf of Student's t-distribution given a certain quantile value and df
+
+```{r}
+# Find 95th quantile of t-distribution 
+qt(0.95, df =3)
+
+# this mean 95% area is covered between t values of -infinity and 2.353363
+pt(2.353363,df=3)
+
+```
+```{r}
+qvec <- seq(0,1,0.01)
+qvec
+qt(qvec,df=3)
+
+```
+
+Now we demonstrate Student's t-test 
+
+1) A two sample t-test is used to test whether or not the means of two populations are equal.
+Suppose we want to know whether or not the mean weight between two different species of turtles is equal. Since there are thousands of turtles in each population, it would be too time-consuming and costly to go around and weigh each individual turtle.
+
+Instead, we might take a simple random sample of 15 turtles from each population and use the mean weight in each sample to determine if the mean weight is equal between the two populations:
+
+
+
+H0 : mu1 and mu2 are equal i.e. mu1 - mu2 = 0
+HA : 
+
+The alternative hypothesis can be either two-tailed, left-tailed, or right-tailed:
+
+H1 (two-tailed): μ1 ≠ μ2 (the two population means are not equal)
+H1 (left-tailed): μ1 < μ2 (population 1 mean is less than population 2 mean)
+H1 (right-tailed): μ1> μ2 (population 1 mean is greater than population 2 mean)
+
+
+https://www.statology.org/two-sample-t-test/
+
+We use the following formula to calculate the test statistic t:
+
+Test statistic: (x1 – x2)  /  sp(√(1/n1 + 1/n2))
+
+where x1 and x2 are the sample means, n1 and n2 are the sample sizes, and where sp is calculated as:
+
+sp = √ ((n1-1)s1*s1 +  (n2-1)s2*s2) /  (n1+n2-2)
+
+where s1 and s2 are the sample standard deviations.
+
+If the p-value that corresponds to the test statistic t with (n1+n2-1) degrees of freedom is less than your chosen significance level (common choices are 0.10, 0.05, and 0.01) then you can reject the null hpothesis.
+
+
+Two Sample t-test: Assumptions
+For the results of a two sample t-test to be valid, the following assumptions should be met:
+
+The observations in one sample should be independent of the observations in the other sample.
+The data should be approximately normally distributed.
+The two samples should have approximately the same variance. If this assumption is not met, you should instead perform Welch’s t-test.
+
+Two Sample t-test: Example
+Suppose we want to know whether or not the mean weight between two different species of turtles is equal. To test this, will perform a two sample t-test at significance level α = 0.05 using the following steps:
+
+
+Sample 1:
+
+Sample size n1 = 40
+Sample mean weight x1 = 300
+Sample standard deviation s1 = 18.5
+Sample 2:
+
+Sample size n2 = 38
+Sample mean weight x2 = 305
+Sample standard deviation s2 = 16.7
+
+
+
+Step 3: Calculate the test statistic t.
+
+First, we will calculate the pooled standard deviation sp:
+
+sp = √ (n1-1)s12 +  (n2-1)s22 /  (n1+n2-2) = √ (40-1)18.52 +  (38-1)16.72 /  (40+38-2) = 17.647
+
+Next, we will calculate the test statistic t:
+
+t = (x1 – x2)  /  sp(√1/n1 + 1/n2) =  (300-305) / 17.647(√1/40 + 1/38) = -1.2508
+
+Step 4: Calculate the p-value of the test statistic t.
+
+According to the T Score to P Value Calculator, the p-value associated with t = -1.2508 and degrees of freedom = n1+n2-2 = 40+38-2 = 76 is 0.21484.
+
+Step 5: Draw a conclusion.
+
+Since this p-value is not less than our significance level α = 0.05, we fail to reject the null hypothesis. We do not have sufficient evidence to say that the mean weight of turtles between these two populations is different.
+
+
+
+http://www.sthda.com/english/wiki/unpaired-two-samples-t-test-in-r
+
+What is unpaired two-samples t-test?
+
+The unpaired two-samples t-test is used to compare the mean of two independent groups.
+
+
+For example, suppose that we have measured the weight of 100 individuals: 50 women (group A) and 50 men (group B). We want to know if the mean weight of women (mA) is significantly different from that of men (mB).
+
+In this case, we have two unrelated (i.e., independent or unpaired) groups of samples. Therefore, it’s possible to use an independent t-test to evaluate whether the means are different.
+
+Note that, unpaired two-samples t-test can be used only under certain conditions:
+
+a) when the two groups of samples (A and B), being compared, are normally distributed. This can be checked using Shapiro-Wilk test.
+b) and when the variances of the two groups are equal. This can be checked using F-test.
+
+
+```{r}
+# turtle weights in kg for two species
+x <- c(100,105,103,107,110,107,109)
+y <- c(112,105,113,107,107,107,105)
+
+t.test(x,y,alternative = "two.sided",paired = FALSE, var.equal = FALSE, conf.level = 0.95)
+
+
+```
+We see above, p value 0.255 is greater than 0.05 so we cannot reject null hypothesis
+
+
+https://sites.nicholas.duke.edu/statsreview/means/welch/
+
+
+As you may recall from the one sample module, the general form of a test statistic is:
+
+test static = [estimate - value we hypothesize] / (standard error)
+
+In the case of two independent samples, our estimate is the difference between the two sample means.  The hypothesized value is the difference we hypothesize between the two true population means—this is often zero (to test whether there IS a difference or not between the means of the two populations).
+
+t-stat = [(xbar_1 - xbar_2) - (mu1 - mu2)] / sqrt[s1*s1/n1 + s2*s2/n2]
+
+ 
+
+
+```{r}
+# Area on the left for t-value and df
+pt(-1.1959,df = 12)
+
+# Now two sided
+
+2*pt(-1.1959,df = 12)
+```
+
+
+```{r}
+# turtle weights in kg for two species
+x <- c(100,105,103,107,110,107,109)
+y <- c(100,105,103,107,110,107,109)
+
+t.test(x,y,alternative = "two.sided",paired = FALSE, var.equal = FALSE, conf.level = 0.95)
+
+```
+
+As we see above, p-value > 0.05, so we cannot reject NULL HYPOTHESIS.
+
+
+
+
+http://www.sthda.com/english/wiki/wiki.php?id_contents=7600
+
+
+
+
+
+
+
+ONE SAMPLE t-test
+
+http://www.sthda.com/english/wiki/one-sample-t-test-in-r
+
+one-sample t-test is used to compare the mean of one sample to a known standard (or theoretical/hypothetical) mean (μ).
+
+
+Generally, the theoretical mean comes from:
+
+a previous experiment. For example, compare whether the mean weight of mice differs from 200 mg, a value determined in a previous study.
+or from an experiment where you have control and treatment conditions. If you express your data as “percent of control”, you can test whether the average value of treatment condition differs significantly from 100.
+
+Note that, one-sample t-test can be used only, when the data are normally distributed . This can be checked using Shapiro-Wilk test .
+
+In statistics, we can define the corresponding null hypothesis (H0) as follow:
+
+H0:m=μ
+H0:m≤μ
+H0:m≥μ
+The corresponding alternative hypotheses (Ha) are as follow:
+
+Ha:m≠μ (different)
+Ha:m>μ (greater)
+Ha:m<μ (less)
+
+
+
+Note that:
+
+Hypotheses 1) are called two-tailed tests
+Hypotheses 2) and 3) are called one-tailed tests
+Formula of one-sample t-test
+The t-statistic can be calculated as follow:
+
+t=[xbar − μ] / [s/sqrt(n)]
+
+where,
+
+m is the sample mean
+n is the sample size
+s is the sample standard deviation with n−1 degrees of freedom
+μ is the theoretical value
+We can compute the p-value corresponding to the absolute value of the t-test statistics (|t|) for the degrees of freedom (df): df=n−1.
+
+
+
+```{r}
+X <- rnorm(100,5,2)
+X
+```
+Let us perform a t-test on this sample for mu = 5
+
+```{r}
+t.test(X, mu = 5)
+```
+As p-value 0.4237 is greater than 0.05, we cannot reject the NULL hypothesis that true mean is 5
